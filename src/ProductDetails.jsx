@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Card, Button, Spinner, Alert, Row, Col } from "react-bootstrap";
+import { Card, Button, Spinner, Alert, Row, Col, Modal } from "react-bootstrap";
 
 function ProductDetails() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showDelete, setShowDelete] = useState(false);
+  const [feedback, setFeedback] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -25,6 +27,27 @@ function ProductDetails() {
       });
   }, [id]);
 
+  const handleDelete = async () => {
+    setFeedback(null);
+    try {
+      const res = await fetch(
+        `https://fakestoreapi.com/products/${product.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (!res.ok) throw new Error("Failed to delete product");
+      setFeedback({
+        type: "success",
+        message: "Product deleted! Redirecting...",
+      });
+      setTimeout(() => (window.location.href = "/products"), 1200);
+    } catch (err) {
+      setFeedback({ type: "danger", message: "Error: " + err.message });
+    }
+    setShowDelete(false);
+  };
+
   if (loading)
     return <Spinner animation="border" className="d-block mx-auto mt-5" />;
   if (error)
@@ -38,6 +61,15 @@ function ProductDetails() {
   return (
     <Row className="justify-content-center mt-4">
       <Col md={6}>
+        {feedback && (
+          <Alert
+            variant={feedback.type}
+            onClose={() => setFeedback(null)}
+            dismissible
+          >
+            {feedback.message}
+          </Alert>
+        )}
         <Card>
           <Card.Img
             variant="top"
@@ -64,27 +96,7 @@ function ProductDetails() {
             <Button
               variant="danger"
               className="mb-2 me-2"
-              onClick={async () => {
-                if (
-                  window.confirm(
-                    "Are you sure you want to delete this product?"
-                  )
-                ) {
-                  try {
-                    const res = await fetch(
-                      `https://fakestoreapi.com/products/${product.id}`,
-                      {
-                        method: "DELETE",
-                      }
-                    );
-                    if (!res.ok) throw new Error("Failed to delete product");
-                    alert("Product deleted!");
-                    window.location.href = "/products";
-                  } catch (err) {
-                    alert("Error: " + err.message);
-                  }
-                }
-              }}
+              onClick={() => setShowDelete(true)}
             >
               Delete Product
             </Button>
@@ -98,6 +110,20 @@ function ProductDetails() {
             </Button>
           </Card.Body>
         </Card>
+        <Modal show={showDelete} onHide={() => setShowDelete(false)} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Confirm Delete</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>Are you sure you want to delete this product?</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowDelete(false)}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={handleDelete}>
+              Delete
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </Col>
     </Row>
   );
