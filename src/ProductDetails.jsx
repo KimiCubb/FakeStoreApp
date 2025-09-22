@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Card, Button, Spinner, Alert, Row, Col, Modal } from "react-bootstrap";
+import { Button, Spinner, Alert, Row, Col, Modal } from "react-bootstrap";
+import ProductCard from "./components/ProductCard";
 
 function ProductDetails() {
   const { id } = useParams();
@@ -70,46 +71,27 @@ function ProductDetails() {
             {feedback.message}
           </Alert>
         )}
-        <Card>
-          <Card.Img
-            variant="top"
-            src={product.image}
-            alt={product.title}
-            style={{
-              objectFit: "contain",
-              height: "300px",
-              background: "#f8f9fa",
-            }}
-          />
-          <Card.Body>
-            <Card.Title>{product.title}</Card.Title>
-            <Card.Text>
-              <strong>Category:</strong> {product.category}
-            </Card.Text>
-            <Card.Text>{product.description}</Card.Text>
-            <Card.Text>
-              <strong>Price:</strong> ${product.price}
-            </Card.Text>
-            <Button variant="success" disabled className="mb-2 me-2">
-              Add to Cart
-            </Button>
-            <Button
-              variant="danger"
-              className="mb-2 me-2"
-              onClick={() => setShowDelete(true)}
-            >
-              Delete Product
-            </Button>
-            <Button
-              variant="secondary"
-              className="mb-2"
-              as="a"
-              href={`/products/${product.id}/edit`}
-            >
-              Edit Product
-            </Button>
-          </Card.Body>
-        </Card>
+        <ProductCard product={product} showActions={false} />
+        <div className="d-flex flex-wrap justify-content-center mt-3">
+          <Button variant="success" disabled className="mb-2 me-2">
+            Add to Cart
+          </Button>
+          <Button
+            variant="danger"
+            className="mb-2 me-2"
+            onClick={() => setShowDelete(true)}
+          >
+            Delete Product
+          </Button>
+          <Button
+            variant="secondary"
+            className="mb-2"
+            as="a"
+            href={`/products/${product.id}/edit`}
+          >
+            Edit Product
+          </Button>
+        </div>
         <Modal show={showDelete} onHide={() => setShowDelete(false)} centered>
           <Modal.Header closeButton>
             <Modal.Title>Confirm Delete</Modal.Title>
